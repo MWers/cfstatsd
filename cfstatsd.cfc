@@ -1,4 +1,4 @@
-<!--- 
+<!---
 Copyright (c) 2011-2012 Matthew Walker
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -20,7 +20,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
  --->
 
-<!--- 
+<!---
 cfstatsd is a ColdFusion client for StatsD (https://github.com/etsy/statsd)
 
 More info on StatsD:
@@ -62,7 +62,7 @@ Cheers!
 		<cfargument name="port" type="numeric" required="false" default="8125" />
 
 		<cfset this.host = arguments.host />
-		<cfset this.port = arguments.port />	
+		<cfset this.port = arguments.port />
 
 		<cfset this._channel = createObject('java','java.nio.channels.DatagramChannel').open() />
 		<cfset _host = createObject('java','java.net.InetAddress').getByName(this.host) />
@@ -76,7 +76,7 @@ Cheers!
 		<cfargument name="key" type="string" required="true" />
 		<cfargument name="magnitude" type="numeric" required="false" default="1" />
 		<cfargument name="sampleRate" type="numeric" required="false" default="1" />
-		
+
 		<cfreturn incrementMulti(arguments.magnitude, arguments.sampleRate, arguments.key) />
 	</cffunction>
 
@@ -85,7 +85,7 @@ Cheers!
 		<cfargument name="magnitude" type="numeric" required="true" />
 		<cfargument name="sampleRate" type="numeric" required="true" />
 		<cfargument name="keys" type="any" required="true" />
-		
+
 		<!--- Treat non-named arguments as java-style varargs arguments (ex. String... stats) --->
 		<cfset namedArgumentCount = 3 />
 		<cfset keysArray = ArrayNew(1) />
@@ -101,7 +101,7 @@ Cheers!
 				</cfloop>
 			</cfif>
 		<cfelse>
-			<cfthrow type="InvalidArgumentTypeException" 
+			<cfthrow type="InvalidArgumentTypeException"
 				message="The keys argument passed to the incrementMulti method is not an array or one or more strings." />
 		</cfif>
 
@@ -118,7 +118,7 @@ Cheers!
 		<cfargument name="key" type="string" required="true" />
 		<cfargument name="magnitude" type="numeric" required="false" default="1" />
 		<cfargument name="sampleRate" type="numeric" required="false" default="1" />
-		
+
 		<cfreturn decrementMulti(arguments.magnitude, arguments.sampleRate, arguments.key) />
 	</cffunction>
 
@@ -127,7 +127,7 @@ Cheers!
 		<cfargument name="magnitude" type="numeric" required="true" />
 		<cfargument name="sampleRate" type="numeric" required="true" />
 		<cfargument name="keys" type="any" required="true" />
-		
+
 		<!--- Treat non-named arguments as java-style varargs arguments (ex. String... stats) --->
 		<cfset namedArgumentCount = 3 />
 		<cfset keysArray = ArrayNew(1) />
@@ -143,7 +143,7 @@ Cheers!
 				</cfloop>
 			</cfif>
 		<cfelse>
-			<cfthrow type="InvalidArgumentTypeException" 
+			<cfthrow type="InvalidArgumentTypeException"
 				message="The keys argument passed to the decrementMulti method is not an array or one or more strings." />
 		</cfif>
 
@@ -175,7 +175,7 @@ Cheers!
 	<cffunction name="send" access="private" returntype="boolean" output="no">
 		<cfargument name="sampleRate" type="numeric" required="true" />
 		<cfargument name="stats" type="any" required="true" />
-		
+
 		<!--- Treat non-named arguments as java-style varargs arguments (ex. String... stats) --->
 		<cfset namedArgumentCount = 2 />
 		<cfset statsArray = ArrayNew(1) />
@@ -191,7 +191,7 @@ Cheers!
 				</cfloop>
 			</cfif>
 		<cfelse>
-			<cfthrow type="InvalidArgumentTypeException" 
+			<cfthrow type="InvalidArgumentTypeException"
 				message="The stats argument passed to the send method is not an array or one or more strings." />
 		</cfif>
 
@@ -236,7 +236,7 @@ Cheers!
 
 			<cfcatch type="Any">
 				<cflog text="cfstatsd: Could not send stat #arguments.stat# to host #this.host#:#this.port#" type="Warning" log="Application" />
-			</cfcatch>			
+			</cfcatch>
 		</cftry>
 
 		<cfreturn false />
