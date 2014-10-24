@@ -1,4 +1,4 @@
-<!--- 
+<!---
 Copyright (c) 2011-2012 Matthew Walker
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -20,7 +20,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
  --->
 
-<!--- 
+<!---
 cfstatsd is a ColdFusion client for StatsD (https://github.com/etsy/statsd)
 
 More info on StatsD:
@@ -62,10 +62,10 @@ Cheers!
 		<cfargument name="port" type="numeric" required="false" default="8125" />
 
 		<cfset this.host = arguments.host />
-		<cfset this.port = arguments.port />	
+		<cfset this.port = arguments.port />
 
 		<cfset this._channel = createObject('java','java.nio.channels.DatagramChannel').open() />
-		<cfset _host = createObject('java','java.net.InetAddress').getByName(this.host) />
+		<cfset var _host = createObject('java','java.net.InetAddress').getByName(this.host) />
 		<cfset this._address = createObject('java','java.net.InetSocketAddress').init(_host,this.port) />
 
 		<cfreturn this>
@@ -76,7 +76,7 @@ Cheers!
 		<cfargument name="key" type="string" required="true" />
 		<cfargument name="magnitude" type="numeric" required="false" default="1" />
 		<cfargument name="sampleRate" type="numeric" required="false" default="1" />
-		
+
 		<cfreturn incrementMulti(arguments.magnitude, arguments.sampleRate, arguments.key) />
 	</cffunction>
 
@@ -85,10 +85,10 @@ Cheers!
 		<cfargument name="magnitude" type="numeric" required="true" />
 		<cfargument name="sampleRate" type="numeric" required="true" />
 		<cfargument name="keys" type="any" required="true" />
-		
+
 		<!--- Treat non-named arguments as java-style varargs arguments (ex. String... stats) --->
-		<cfset namedArgumentCount = 3 />
-		<cfset keysArray = ArrayNew(1) />
+		<cfset var namedArgumentCount = 3 />
+		<cfset var keysArray = ArrayNew(1) />
 		<cfif isArray(arguments.keys)>
 			<cfset keysArray = arguments.keys />
 		<cfelseif isSimpleValue(arguments.keys)>
@@ -101,11 +101,11 @@ Cheers!
 				</cfloop>
 			</cfif>
 		<cfelse>
-			<cfthrow type="InvalidArgumentTypeException" 
+			<cfthrow type="InvalidArgumentTypeException"
 				message="The keys argument passed to the incrementMulti method is not an array or one or more strings." />
 		</cfif>
 
-		<cfset stats = ArrayNew(1) />
+		<cfset var stats = ArrayNew(1) />
 		<cfloop from="1" to="#arrayLen(keysArray)#" index="i">
 			<cfset ArrayAppend(stats, keysArray[i] & ":" & arguments.magnitude & "|c") />
 		</cfloop>
@@ -118,7 +118,7 @@ Cheers!
 		<cfargument name="key" type="string" required="true" />
 		<cfargument name="magnitude" type="numeric" required="false" default="1" />
 		<cfargument name="sampleRate" type="numeric" required="false" default="1" />
-		
+
 		<cfreturn decrementMulti(arguments.magnitude, arguments.sampleRate, arguments.key) />
 	</cffunction>
 
@@ -127,10 +127,10 @@ Cheers!
 		<cfargument name="magnitude" type="numeric" required="true" />
 		<cfargument name="sampleRate" type="numeric" required="true" />
 		<cfargument name="keys" type="any" required="true" />
-		
+
 		<!--- Treat non-named arguments as java-style varargs arguments (ex. String... stats) --->
-		<cfset namedArgumentCount = 3 />
-		<cfset keysArray = ArrayNew(1) />
+		<cfset var namedArgumentCount = 3 />
+		<cfset var keysArray = ArrayNew(1) />
 		<cfif isArray(arguments.keys)>
 			<cfset keysArray = arguments.keys />
 		<cfelseif isSimpleValue(arguments.keys)>
@@ -143,7 +143,7 @@ Cheers!
 				</cfloop>
 			</cfif>
 		<cfelse>
-			<cfthrow type="InvalidArgumentTypeException" 
+			<cfthrow type="InvalidArgumentTypeException"
 				message="The keys argument passed to the decrementMulti method is not an array or one or more strings." />
 		</cfif>
 
@@ -175,10 +175,10 @@ Cheers!
 	<cffunction name="send" access="private" returntype="boolean" output="no">
 		<cfargument name="sampleRate" type="numeric" required="true" />
 		<cfargument name="stats" type="any" required="true" />
-		
+
 		<!--- Treat non-named arguments as java-style varargs arguments (ex. String... stats) --->
-		<cfset namedArgumentCount = 2 />
-		<cfset statsArray = ArrayNew(1) />
+		<cfset var namedArgumentCount = 2 />
+		<cfset var statsArray = ArrayNew(1) />
 		<cfif isArray(arguments.stats)>
 			<cfset statsArray = arguments.stats />
 		<cfelseif isSimpleValue(arguments.stats)>
@@ -191,15 +191,15 @@ Cheers!
 				</cfloop>
 			</cfif>
 		<cfelse>
-			<cfthrow type="InvalidArgumentTypeException" 
+			<cfthrow type="InvalidArgumentTypeException"
 				message="The stats argument passed to the send method is not an array or one or more strings." />
 		</cfif>
 
 		<cfscript>
 			// this code borrows heavily from StatsdClient.java
-			retval = false;
+			var retval = false;
 			if (arguments.sampleRate LT 1.0) {
-				for (i = 1; i LTE ArrayLen(statsArray); i = i + 1) {
+				for (var i = 1; i LTE ArrayLen(statsArray); i = i + 1) {
 					if (rand() LTE sampleRate) {
 						stat = statsArray[i] & "|@" & arguments.sampleRate;
 						if (doSend(stat)) {
@@ -208,7 +208,7 @@ Cheers!
 					}
 				}
 			} else {
-				for (i = 1; i LTE ArrayLen(statsArray); i = i + 1) {
+				for (var i = 1; i LTE ArrayLen(statsArray); i = i + 1) {
 					if (doSend(statsArray[i])) {
 						retval = true;
 					}
@@ -223,10 +223,10 @@ Cheers!
 		<cfargument name="stat" type="string" required="true" />
 
 		<cftry>
-			<cfset data = arguments.stat.getBytes("utf-8") />
-			<cfset byteBuffer = createObject('java','java.nio.ByteBuffer') />
-			<cfset buff = byteBuffer.wrap(data) />
-			<cfset nbSentBytes = this._channel.send(buff, this._address) />
+			<cfset var data = arguments.stat.getBytes("utf-8") />
+			<cfset var byteBuffer = createObject('java','java.nio.ByteBuffer') />
+			<cfset var buff = byteBuffer.wrap(data) />
+			<cfset var nbSentBytes = this._channel.send(buff, this._address) />
 
 			<cfif nbSentBytes EQ Len(data)>
 				<cfreturn true />
@@ -236,7 +236,7 @@ Cheers!
 
 			<cfcatch type="Any">
 				<cflog text="cfstatsd: Could not send stat #arguments.stat# to host #this.host#:#this.port#" type="Warning" log="Application" />
-			</cfcatch>			
+			</cfcatch>
 		</cftry>
 
 		<cfreturn false />
