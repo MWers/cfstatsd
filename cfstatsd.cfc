@@ -61,11 +61,12 @@ Cheers!
 		<cfargument name="host" type="string" required="true" />
 		<cfargument name="port" type="numeric" required="false" default="8125" />
 
+		<cfset var _host = "" />
 		<cfset this.host = arguments.host />
 		<cfset this.port = arguments.port />
 
 		<cfset this._channel = createObject('java','java.nio.channels.DatagramChannel').open() />
-		<cfset var _host = createObject('java','java.net.InetAddress').getByName(this.host) />
+		<cfset _host = createObject('java','java.net.InetAddress').getByName(this.host) />
 		<cfset this._address = createObject('java','java.net.InetSocketAddress').init(_host,this.port) />
 
 		<cfreturn this>
@@ -86,6 +87,8 @@ Cheers!
 		<cfargument name="sampleRate" type="numeric" required="true" />
 		<cfargument name="keys" type="any" required="true" />
 
+		<cfset var stats = ArrayNew(1) />
+
 		<!--- Treat non-named arguments as java-style varargs arguments (ex. String... stats) --->
 		<cfset var namedArgumentCount = 3 />
 		<cfset var keysArray = ArrayNew(1) />
@@ -105,7 +108,6 @@ Cheers!
 				message="The keys argument passed to the incrementMulti method is not an array or one or more strings." />
 		</cfif>
 
-		<cfset var stats = ArrayNew(1) />
 		<cfloop from="1" to="#arrayLen(keysArray)#" index="i">
 			<cfset ArrayAppend(stats, keysArray[i] & ":" & arguments.magnitude & "|c") />
 		</cfloop>
@@ -179,6 +181,9 @@ Cheers!
 		<!--- Treat non-named arguments as java-style varargs arguments (ex. String... stats) --->
 		<cfset var namedArgumentCount = 2 />
 		<cfset var statsArray = ArrayNew(1) />
+		<cfset var retval = false />
+		<cfset var i = 1 />
+
 		<cfif isArray(arguments.stats)>
 			<cfset statsArray = arguments.stats />
 		<cfelseif isSimpleValue(arguments.stats)>
@@ -197,10 +202,10 @@ Cheers!
 
 		<cfscript>
 			// this code borrows heavily from StatsdClient.java
-			var retval = false;
+			retval = false;
 			if (arguments.sampleRate LT 1.0) {
-				for (var i = 1; i LTE ArrayLen(statsArray); i = i + 1) {
-					if (rand() LTE sampleRate) {
+				for (i = 1; i LTE ArrayLen(statsArray); i = i + 1) {
+					if (rand() LTE arguments.sampleRate) {
 						stat = statsArray[i] & "|@" & arguments.sampleRate;
 						if (doSend(stat)) {
 							retval = true;
@@ -208,7 +213,7 @@ Cheers!
 					}
 				}
 			} else {
-				for (var i = 1; i LTE ArrayLen(statsArray); i = i + 1) {
+				for (i = 1; i LTE ArrayLen(statsArray); i = i + 1) {
 					if (doSend(statsArray[i])) {
 						retval = true;
 					}
@@ -222,11 +227,16 @@ Cheers!
 	<cffunction name="doSend" access="private" returntype="boolean" output="no">
 		<cfargument name="stat" type="string" required="true" />
 
+		<cfset var data = "" />
+		<cfset var byteBuffer = "" />
+		<cfset var buff = "" />
+		<cfset var nbSentBytes = "" />
+
 		<cftry>
-			<cfset var data = arguments.stat.getBytes("utf-8") />
-			<cfset var byteBuffer = createObject('java','java.nio.ByteBuffer') />
-			<cfset var buff = byteBuffer.wrap(data) />
-			<cfset var nbSentBytes = this._channel.send(buff, this._address) />
+			<cfset data = arguments.stat.getBytes("utf-8") />
+			<cfset byteBuffer = createObject('java','java.nio.ByteBuffer') />
+			<cfset buff = byteBuffer.wrap(data) />
+			<cfset nbSentBytes = this._channel.send(buff, this._address) />
 
 			<cfif nbSentBytes EQ Len(data)>
 				<cfreturn true />
